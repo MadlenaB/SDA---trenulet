@@ -34,7 +34,6 @@ typedef struct CoadaOp{
 TCoadaOp* InitQ();
 TTren* InitT();
 int IntrQ(TCoadaOp *coadaOp, char *op, char *val);
-void AfisareQ(TCoadaOp *coadaOp);
 void MOVE_LEFT(TTren *tren);
 int MOVE_RIGHT(TTren *tren);
 void WRITE(TTren *tren, char val);
@@ -49,4 +48,5 @@ void SHOW_CURRENT(TTren *tren, FILE *out);
 void SHOW(TTren *tren, FILE *out);
 void SWITCH(TCoadaOp *coadaOp);
 void EXECUTE(TTren *tren, TCoadaOp *coadaOp, FILE *out);
-//void DistrQ(TCoadaOp **coadaOp);
+void DistrQ(TCoadaOp **coadaOp);
+void DistrugeTren(TTren *tren);
