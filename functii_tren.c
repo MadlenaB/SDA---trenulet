@@ -44,9 +44,9 @@ TTren *InitT(){
 }
 
 void MOVE_LEFT(TTren *tren){
-    if(tren && tren->mecanic){
+    if(tren && tren->mecanic){  
         if(tren->mecanic == tren->s->urm){ /*Verificam daca mecanicul se afla in primul vagon*/
-            tren->mecanic = tren->s->urm; /*Daca mecanicul se afla in primul vagon atunci se muta in ultimul*/
+            tren->mecanic = tren->s->pre; /*Daca mecanicul se afla in primul vagon atunci se muta in ultimul*/
         }
         else{
             /*In caz contrar, mecanicul va trege pe pozitia precedenta*/
@@ -101,7 +101,10 @@ void CLEAR_CELL(TTren *tren){
         else{
             aux->pre->urm = aux->urm;
             aux->urm->pre = aux->pre;
-            tren->mecanic = aux->pre;
+            /*Verificam daca in stanga se afla santinela- in caz afirmtiv mutam mecanicul in ultimul vagon*/
+            if(aux->pre == tren->s){
+                tren->mecanic = tren->s->pre;
+            } else tren->mecanic = aux->pre;
             free(aux);
         }
     }
@@ -137,6 +140,7 @@ void INSERT_LEFT(TTren *tren, FILE *out, char val){
             if(!aux) return;
             aux->urm = tren->mecanic;
             aux->pre = tren->mecanic->pre;
+            tren->mecanic->pre->urm = aux;
             tren->mecanic->pre = aux;
             tren->mecanic = aux;
         }
@@ -169,19 +173,23 @@ void SEARCH(TTren *tren, FILE *out, char *string){
     if(tren && tren->mecanic){
         TVagon *aux = tren->mecanic; 
         TVagon *inc;
-        TVagon *ultim_vagon;
         int k = strlen(string);
         int i = 0;
+
         do{
             if(aux->info == string[i]){
-                //Analizam cateva cazuri
-                //Primul caz va fi atunci cand i = 0, deci ne aflam la inceputul sirului 
+                /*Analizam cateva cazuri*/
+                /*Primul caz va fi atunci cand i = 0, deci ne aflam la inceputul sirului*/
+                printf("i1=%d\n",i);
+                printf("k1=%d\n",k);
                 if(i == 0){
                     inc = aux;
                 } 
-                i++; //Avansam in string, il ajustam aici pe i pentru a putea verifica conditia i == k
+                i++; /*Avansam in string, il ajustam aici pe i pentru a putea verifica conditia i == k*/
+                printf("i2=%d\n",i);
+                printf("k2=%d\n",k);
                 if(i == k){
-                    tren->mecanic = inc; // mecanicul se va afla la inceputul sirului in caz ca a fost gasit sirul 
+                    tren->mecanic = inc; /*mecanicul se va afla la inceputul sirului in caz ca a fost gasit sirul*/
                     return;
                 }
             } else{
@@ -198,18 +206,19 @@ void SEARCH(TTren *tren, FILE *out, char *string){
 
 void SEARCH_LEFT(TTren *tren, FILE *out, char *string){
     if(tren && tren->mecanic){
-        TVagon *aux = tren->mecanic; //Pornim cautarea de la vagonul cu mecanic
+        TVagon *aux = tren->mecanic; /*Pornim cautarea de la vagonul cu mecanic*/
         int k = strlen(string);
-        int i = k-1; //Incepem iterarile in partea stanga, deci analizam stringul de la sfarsit la inceput
+        int i = 0; 
         do{
             if(aux->info == string[i]){
-                if(i == 0){
+                i++;
+                if(i == k){
                     tren->mecanic = aux;
                     return;
                 }
-                i--;
-            } else{
-                i = k-1;
+            } else {
+                /*Daca nu gasim sirul si nu am parcurs pana la intalnirea santinele il resetam pe i*/
+                i = 0;
             }
             aux = aux->pre;
         } while(aux != tren->s);
@@ -240,7 +249,7 @@ void SEARCH_RIGHT(TTren *tren, FILE *out, char *string){
 
 void SHOW_CURRENT(TTren *tren, FILE *out){
     if(tren && tren->mecanic){
-        fprintf(out,"|%c|", tren->mecanic->info);
+        fprintf(out,"%c\n", tren->mecanic->info);
     }
     else return;
 }
@@ -255,6 +264,7 @@ void SHOW(TTren *tren, FILE *out){
                 fprintf(out, "%c", aux->info);
             }
         }
+        fprintf(out,"\n");
     }
 }
 
@@ -278,18 +288,18 @@ int IntrQ(TCoadaOp *coadaOp, char *op, char *val){
     return 1;
 }
 
-void AfisareQ(TCoadaOp *coadaOp)  /* afisare elementele cozii */
-{
-  TListaOp *aux = coadaOp->inc;
-  if(!coadaOp->inc && !coadaOp->sf) return;
+// void AfisareQ(TCoadaOp *coadaOp)  /* afisare elementele cozii */
+// {
+//   TListaOp *aux = coadaOp->inc;
+//   if(!coadaOp->inc && !coadaOp->sf) return;
 
-  while(aux){
-    printf("aux-operation: %s\t", aux->operation.op);
-    printf("aux-value:%s", aux->operation.val);
-    printf("\n");
-    aux = aux->urm;
-  }
-}
+//   while(aux){
+//     printf("aux-operation: %s\t", aux->operation.op);
+//     printf("aux-value:%s", aux->operation.val);
+//     printf("\n");
+//     aux = aux->urm;
+//   }
+// }
 
 void SWITCH(TCoadaOp *coadaOp){
     if(coadaOp->inc && coadaOp->sf && coadaOp->inc != coadaOp->sf){
@@ -348,13 +358,28 @@ void EXECUTE(TTren *tren, TCoadaOp *coadaOp, FILE *out){
 void DistrQ(TCoadaOp **coadaOp) /* distruge coada */
 {
   TListaOp *p, *aux;
-  p = (*coadaOp)->sf->urm; // setam p la inceputul de lista;
-  while(p!=(*coadaOp)->sf){
+  p = (*coadaOp)->inc; /*setam p la inceputul de cozii*/ 
+  while(p != NULL){
     aux = p;
     p = p->urm;
     free(aux);
   }
+  free((*coadaOp)->inc);
   free((*coadaOp)->sf);
-  (*coadaOp)->sf = NULL; // coada vida
+  (*coadaOp)->inc = NULL; // coada vida
+  (*coadaOp)->sf = NULL;
   free(*coadaOp);
+}
+
+void DistrugeTren(TTren *tren){
+    if(tren == NULL) return;
+    TVagon *aux = tren->s->urm;
+    TVagon *p;
+    while(aux != tren->s){
+        p = aux->urm;
+        free(aux);
+        aux = p;
+    }
+    free(tren->s);
+    free(tren);
 }
