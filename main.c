@@ -40,7 +40,6 @@ int main(){
             }
             
         }
-        //AfisareQ(coadaOp);
     }
     DistrQ(&coadaOp);
     DistrugeTren(&tren);
