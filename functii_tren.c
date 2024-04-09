@@ -173,38 +173,42 @@ void SEARCH(TTren *tren, FILE *out, char *string){
     if(tren && tren->mecanic){
         TVagon *aux = tren->mecanic; 
         TVagon *inc;
-        int k = strlen(string);
-        int i = 0;
-
+        int i, k;
+        k = strlen(string);
+        i = 0;
         do{
             if(aux->info == string[i]){
-                /*Analizam cateva cazuri*/
-                /*Primul caz va fi atunci cand i = 0, deci ne aflam la inceputul sirului*/
-                printf("i1=%d\n",i);
-                printf("k1=%d\n",k);
+                /*cand i = 0, deci ne aflam la inceputul sirului si il memorizam intr-o variabila inc*/
                 if(i == 0){
                     inc = aux;
-                } 
-                i++; /*Avansam in string, il ajustam aici pe i pentru a putea verifica conditia i == k*/
-                printf("i2=%d\n",i);
-                printf("k2=%d\n",k);
+                }
+                i++;
+                
                 if(i == k){
                     tren->mecanic = inc; /*mecanicul se va afla la inceputul sirului in caz ca a fost gasit sirul*/
                     return;
                 }
-            } else{
+            } else {
                 i = 0; /* Daca sirul nu a fost gasit si lista nu a fost parcursa complet atunci i va devine din nou 0
                           pentru a parcurge inca o data sirul*/
-                inc = NULL; /*Resetam inceputul sirului gasit la NULL*/
+                if(aux->info == string[i]){
+                    inc = aux;
+                    i++;
+                } else inc = NULL; /*Resetam inceputul sirului gasit la NULL*/
+
             }
             aux = aux->urm; /*Avansam la urmatoarea celula pornind cu t->mecanic pana ne intoarcem inapoi*/
-        } while(aux != tren->mecanic);
+            if (aux == tren->s){
+                aux = tren->s->urm;
+            }
+        }while(aux != tren->mecanic);
         fprintf(out, "ERROR\n");
     }
     else return;
 }
 
 void SEARCH_LEFT(TTren *tren, FILE *out, char *string){
+    printf("Funcția SEARCH a primit șirul: '%s'\n", string);
     if(tren && tren->mecanic){
         TVagon *aux = tren->mecanic; /*Pornim cautarea de la vagonul cu mecanic*/
         int k = strlen(string);
@@ -364,14 +368,13 @@ void DistrQ(TCoadaOp **coadaOp) /* distruge coada */
     p = p->urm;
     free(aux);
   }
-  free((*coadaOp)->inc);
-  free((*coadaOp)->sf);
   (*coadaOp)->inc = NULL; // coada vida
   (*coadaOp)->sf = NULL;
   free(*coadaOp);
 }
 
 void DistrugeTren(TTren *tren){
+    /*Verificam daca trenul este NULL*/
     if(tren == NULL) return;
     TVagon *aux = tren->s->urm;
     TVagon *p;
