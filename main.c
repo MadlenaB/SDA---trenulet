@@ -19,7 +19,6 @@ int main(){
     char val[10];
     for (int i = 0; i < numarOperatii; i++) {
         fscanf(in, "%s", op);
-
         if(strcmp(op, "EXECUTE") == 0){
             EXECUTE(tren, coadaOp, out);
         } else if(strcmp(op, "SHOW_CURRENT") == 0){
@@ -39,7 +38,9 @@ int main(){
                 fscanf(in, "%s\n", val);
                 IntrQ(coadaOp, op, val); /*Introducem in coada operatiile din fisier*/
             }
+            
         }
+        //AfisareQ(coadaOp);
     }
     DistrQ(&coadaOp);
     DistrugeTren(tren);
