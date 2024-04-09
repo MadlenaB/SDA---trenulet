@@ -1,8 +1,8 @@
 build:
-	gcc -o tren main.c functii_tren.c
+	gcc -fsanitize=undefined -o tema1 main.c functii_tren.c
 run:
-	./tren
+	./tema1
 clean:
-	rm tren
+	rm tema1
 valgrind:
-	valgrind --leak check=yes --track-origins=yes ./tren 
+	valgrind --leak check=yes --track-origins=yes ./tema1
