@@ -12,12 +12,12 @@ typedef struct Vagon {
 /*Structura unui tren*/
 typedef struct Tren {
     TVagon* s; /* s - santinela */
-    TVagon* mecanic; /* adresa mecanicului din trenulet*/
+    TVagon* mecanic; /* adresa mecanicului din trenulet */
 } TTren;
 
 typedef struct Op{
     char op[200]; /*--array pentru stocarea denumirilor de operatii--*/
-    char val[10]; /*--valoarea pe care o trimitem eventual in functii--*/
+    char val[20]; /*--valoarea pe care o trimitem eventual in functii--*/
 }TOp; /*--Structura care ne va stoca operatiile din fisier--*/
 
 typedef struct ListaOp{
@@ -50,3 +50,4 @@ void SWITCH(TCoadaOp *coadaOp);
 void EXECUTE(TTren *tren, TCoadaOp *coadaOp, FILE *out);
 void DistrQ(TCoadaOp **coadaOp);
 void DistrugeTren(TTren *tren);
+//void AfisareQ(TCoadaOp *coadaOp);
