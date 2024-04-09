@@ -21,7 +21,7 @@ typedef struct Op{
 }TOp; /*--Structura care ne va stoca operatiile din fisier--*/
 
 typedef struct ListaOp{
-    TOp operation;
+    TOp operation; /*--o celula din lista dubla inlantuita care contine structura operatii--*/
     struct ListaOp *pre;
     struct ListaOp *urm;
 } TListaOp; /*--Lista dublu inlantuita care va stoca toate operatiile in coada--*/
@@ -49,5 +49,4 @@ void SHOW(TTren *tren, FILE *out);
 void SWITCH(TCoadaOp *coadaOp);
 void EXECUTE(TTren *tren, TCoadaOp *coadaOp, FILE *out);
 void DistrQ(TCoadaOp **coadaOp);
-void DistrugeTren(TTren *tren);
-//void AfisareQ(TCoadaOp *coadaOp);
+void DistrugeTren(TTren **tren);
