@@ -43,7 +43,7 @@ int main(){
         //AfisareQ(coadaOp);
     }
     DistrQ(&coadaOp);
-    DistrugeTren(tren);
+    DistrugeTren(&tren);
     fclose(in);
     fclose(out);
 return 0;
