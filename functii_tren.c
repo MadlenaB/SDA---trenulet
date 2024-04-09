@@ -2,6 +2,7 @@
 #include "tren.h"
 
 TVagon* AlocaCelula(char x){
+    /*Functia care aloca o celula de tip TVagon*/
     TVagon* aux = (TVagon*)malloc(sizeof(TVagon));
     if(!aux) return NULL;
     aux->info = x;
@@ -9,8 +10,20 @@ TVagon* AlocaCelula(char x){
     aux->pre = NULL;
     return aux;
 }
+TListaOp* AlocaOp(char *op, char *val){
+    /*Functia care aloca o celula de tip TListaOp*/
+    TListaOp* aux = (TListaOp*)malloc(sizeof(TListaOp));
+    if(!aux) return NULL;
+    /*Copiem sirurile de caractere pentru operatie si valori in valorile efective din structuri*/
+    strcpy(aux->operation.op, op);
+    strcpy(aux->operation.val, val);
+    aux->pre = NULL;
+    aux->urm = NULL;
+    return aux;
+}
 
 TCoadaOp *InitQ(){
+    /*Functia de initializare a cozii in care stocam operatiile*/
     TCoadaOp *coadaOp;
     coadaOp = (TCoadaOp*)malloc(sizeof(TCoadaOp));
     if(!coadaOp) return NULL;
@@ -20,6 +33,7 @@ TCoadaOp *InitQ(){
 }
 
 TTren *InitT(){
+    /*Functia de initializare a Trenului si creeaza structura - |#| */
     TTren *tren;
     tren = (TTren*)malloc(sizeof(TTren));
     if(!tren) return NULL;
@@ -44,12 +58,13 @@ TTren *InitT(){
 }
 
 void MOVE_LEFT(TTren *tren){
+    /*Functia muta mecanicul in vagonasul din stanga*/
     if(tren && tren->mecanic){  
         if(tren->mecanic == tren->s->urm){ /*Verificam daca mecanicul se afla in primul vagon*/
             tren->mecanic = tren->s->pre; /*Daca mecanicul se afla in primul vagon atunci se muta in ultimul*/
         }
         else{
-            /*In caz contrar, mecanicul va trege pe pozitia precedenta*/
+            /*In caz contrar, mecanicul va trece pe pozitia precedenta*/
             tren->mecanic = tren->mecanic->pre; 
         }
     }
@@ -58,6 +73,7 @@ void MOVE_LEFT(TTren *tren){
 int MOVE_RIGHT(TTren *tren){
     /*eroare la cuplare - return 0
       cuplare cu succes - return 1*/
+    /*Functia creeaza un nou vagonas la dreopta si il muta pe macanic in acelasi vagonas*/
     if(tren && tren->mecanic){
         if(tren->mecanic == tren->s->pre){
             TVagon *aux = AlocaCelula('#');
@@ -83,6 +99,7 @@ void WRITE(TTren *tren, char val){
 }
 
 void CLEAR_CELL(TTren *tren){
+    /*Functia elibereaza vagonasul in care se afla mecanicul*/
     if(tren && tren->mecanic){
         TVagon *aux;
         aux = tren->mecanic;
@@ -112,6 +129,7 @@ void CLEAR_CELL(TTren *tren){
 }
 
 void CLEAR_ALL(TTren *tren){
+    /*Functia care va elibera vagoanele din tren si va initializa un tren nou*/
     if(tren){
         TVagon* p = tren->s->urm;
         TVagon* aux;
@@ -132,6 +150,7 @@ void CLEAR_ALL(TTren *tren){
 }
 
 void INSERT_LEFT(TTren *tren, FILE *out, char val){
+    /*Functia de inserare la stanga*/
     if(tren && tren->mecanic){
         if(tren->mecanic == tren->s->urm){
             fprintf(out, "ERROR\n");
@@ -148,9 +167,11 @@ void INSERT_LEFT(TTren *tren, FILE *out, char val){
 }
 
 void INSERT_RIGHT(TTren *tren, char val){
+    /*Functia de inserare la dreapta*/
     if(tren && tren->mecanic) {
         TVagon* aux = AlocaCelula(val);
         if(!aux) return;
+        //Daca mecanicul se afla in ultimul vagon 
         if(tren->mecanic->urm == tren->s){
             aux->pre = tren->mecanic;
             aux->urm = tren->s;
@@ -191,6 +212,8 @@ void SEARCH(TTren *tren, FILE *out, char *string){
             } else {
                 i = 0; /* Daca sirul nu a fost gasit si lista nu a fost parcursa complet atunci i va devine din nou 0
                           pentru a parcurge inca o data sirul*/
+                /*Verificam daca celula aux curenta nu coincide cu caracterul sirului si setam inceputul 
+                  la aux si incrementam i pentru a trece la urmatoarea celula*/
                 if(aux->info == string[i]){
                     inc = aux;
                     i++;
@@ -198,6 +221,7 @@ void SEARCH(TTren *tren, FILE *out, char *string){
 
             }
             aux = aux->urm; /*Avansam la urmatoarea celula pornind cu t->mecanic pana ne intoarcem inapoi*/
+            /*Daca aux este santinela trenului atunci trebuie sa trecem la urmatorul vagon*/
             if (aux == tren->s){
                 aux = tren->s->urm;
             }
@@ -213,9 +237,12 @@ void SEARCH_LEFT(TTren *tren, FILE *out, char *string){
         TVagon *aux = tren->mecanic; /*Pornim cautarea de la vagonul cu mecanic*/
         int k = strlen(string);
         int i = 0; 
+        /*Facem search la stanga prin trenulet pana ajungem la santinela*/
         do{
             if(aux->info == string[i]){
                 i++;
+                /*Daca i va ajunge la valoarea lungimii string-ului mecanicul va puncta la inceputul secventei
+                    aux va ajunge la sfarsitul ciclului si va indica pozitia mecanicului*/
                 if(i == k){
                     tren->mecanic = aux;
                     return;
@@ -232,13 +259,16 @@ void SEARCH_LEFT(TTren *tren, FILE *out, char *string){
 
 void SEARCH_RIGHT(TTren *tren, FILE *out, char *string){
     if(tren && tren->mecanic){
-        TVagon *aux = tren->mecanic;
+        TVagon *aux = tren->mecanic; /*Setam aux la vagonul unde era mecanicul*/
         int k = strlen(string);
         int i = 0;
+        /*Facem search la dreapta prin trenulet pana ajungem la santinela*/
         do{
             if(aux->info == string[i]){
                 i++;
                 if(i == k){
+                    /*Daca i va ajunge la valoarea lungimii string-ului mecanicul va puncta la inceputul secventei
+                    aux va ajunge la sfarsitul ciclului si va indica pozitia mecanicului*/
                     tren->mecanic = aux;
                     return;
                 }
@@ -252,6 +282,7 @@ void SEARCH_RIGHT(TTren *tren, FILE *out, char *string){
 }
 
 void SHOW_CURRENT(TTren *tren, FILE *out){
+    /*Functia SHOW CURRENT ne va afisa caracterul din vagonul mecanicului*/
     if(tren && tren->mecanic){
         fprintf(out,"%c\n", tren->mecanic->info);
     }
@@ -274,11 +305,7 @@ void SHOW(TTren *tren, FILE *out){
 
 int IntrQ(TCoadaOp *coadaOp, char *op, char *val){
     /*Functia IntrQ va intoarce 1 in cazul unei introduceri reusite si 0 in caz de esec*/
-    TListaOp *aux = (TListaOp*)malloc(sizeof(TListaOp));
-    if(!aux) return 0;
-    strcpy(aux->operation.op, op);
-    strcpy(aux->operation.val, val);
-
+    TListaOp *aux = AlocaOp(op, val);
     if(!coadaOp ->inc && !coadaOp->sf){
         aux->pre = NULL;
         aux->urm = NULL;
@@ -292,20 +319,8 @@ int IntrQ(TCoadaOp *coadaOp, char *op, char *val){
     return 1;
 }
 
-// void AfisareQ(TCoadaOp *coadaOp)  /* afisare elementele cozii */
-// {
-//   TListaOp *aux = coadaOp->inc;
-//   if(!coadaOp->inc && !coadaOp->sf) return;
-
-//   while(aux){
-//     printf("aux-operation: %s\t", aux->operation.op);
-//     printf("aux-value:%s", aux->operation.val);
-//     printf("\n");
-//     aux = aux->urm;
-//   }
-// }
-
 void SWITCH(TCoadaOp *coadaOp){
+    /*Functia SWITCH ne va inversa operatiile din coada*/
     if(coadaOp->inc && coadaOp->sf && coadaOp->inc != coadaOp->sf){
         TListaOp *aux = coadaOp->inc;
         TListaOp *p = NULL;
@@ -325,6 +340,8 @@ void SWITCH(TCoadaOp *coadaOp){
 }
 
 void EXECUTE(TTren *tren, TCoadaOp *coadaOp, FILE *out){
+    /*Daca intalnim comanda EXECUTE atunci executam pe rand operatiile din coada*/
+    /*Odata ce am executat operatiunea, o eliminam din coada*/
     if(!coadaOp->inc && !coadaOp->sf) return;
     TListaOp *aux = coadaOp->inc; /*Extragem inceputul cozii */
     coadaOp->inc = coadaOp->inc->urm; /*Setam inceputul la urmatoarea celula*/
@@ -359,30 +376,23 @@ void EXECUTE(TTren *tren, TCoadaOp *coadaOp, FILE *out){
     free(aux);
 }
 
-void DistrQ(TCoadaOp **coadaOp) /* distruge coada */
+void DistrQ(TCoadaOp **coadaOp) /* distrugem coada */
 {
-  TListaOp *p, *aux;
-  p = (*coadaOp)->inc; /*setam p la inceputul de cozii*/ 
-  while(p != NULL){
-    aux = p;
-    p = p->urm;
-    free(aux);
-  }
-  (*coadaOp)->inc = NULL; // coada vida
+  (*coadaOp)->inc = NULL;
   (*coadaOp)->sf = NULL;
   free(*coadaOp);
 }
 
-void DistrugeTren(TTren *tren){
+void DistrugeTren(TTren **tren){
     /*Verificam daca trenul este NULL*/
-    if(tren == NULL) return;
-    TVagon *aux = tren->s->urm;
+    if(*tren == NULL) return;
+    TVagon *aux = (*tren)->s->urm;
     TVagon *p;
-    while(aux != tren->s){
+    while(aux != (*tren)->s){
         p = aux->urm;
         free(aux);
         aux = p;
     }
-    free(tren->s);
-    free(tren);
+    free((*tren)->s);
+    free(*tren);
 }
