@@ -378,9 +378,21 @@ void EXECUTE(TTren *tren, TCoadaOp *coadaOp, FILE *out){
 
 void DistrQ(TCoadaOp **coadaOp) /* distrugem coada */
 {
-  (*coadaOp)->inc = NULL;
-  (*coadaOp)->sf = NULL;
-  free(*coadaOp);
+    /*Verificam daca coada este nula, adica a fost eliberata complet dupa EXECUTE*/
+    /*In caz ca a mai ramas un element in coada, il eliberam*/
+    if(*coadaOp == NULL) return;
+    else {
+        TListaOp *p = (*coadaOp)->inc;
+        TListaOp *aux;
+        while(p != NULL){
+            aux = p;
+            p = p->urm;
+            free(aux);
+        }
+    }
+    (*coadaOp)->inc = NULL;
+    (*coadaOp)->sf = NULL;
+    free(*coadaOp);
 }
 
 void DistrugeTren(TTren **tren){
